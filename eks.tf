@@ -3,9 +3,9 @@ module "eks" {
   version = "~> 20.0"
   cluster_name    = "test-cluster"
   cluster_version = "1.30"
-  cluster_endpoint_public_access  = false
-  cluster_endpoint_private_access = true
-#  cluster_endpoint_public_access_cidrs	= ["YOUR_IP_CIDR_HERE"] # example public ip ["57.68.3.137/32"] or ["0.0.0.0/0"]
+  cluster_endpoint_public_access  = true
+  cluster_endpoint_private_access = false
+  cluster_endpoint_public_access_cidrs	= ["0.0.0.0/0"]
   vpc_id                                = var.vpc_id
   control_plane_subnet_ids              = var.subnet_ids
   subnet_ids                            = var.subnet_ids
