@@ -1,16 +1,16 @@
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
-  cluster_name    = "test-cluster"
-  cluster_version = "1.30"
+  source                          = "terraform-aws-modules/eks/aws"
+  version                         = "~> 20.0"
+  cluster_name                    = "test-cluster"
+  cluster_version                 = "1.30"
   cluster_endpoint_public_access  = false
   cluster_endpoint_private_access = true
-#  cluster_endpoint_public_access_cidrs	= ["YOUR_IP_CIDR_HERE"] # example public ip ["57.68.3.137/32"] or ["0.0.0.0/0"]
-  vpc_id                                = var.vpc_id
-  control_plane_subnet_ids              = var.subnet_ids
-  subnet_ids                            = var.subnet_ids
+  #  cluster_endpoint_public_access_cidrs	= ["YOUR_IP_CIDR_HERE"] # example public ip ["57.68.3.137/32"] or ["0.0.0.0/0"]
+  vpc_id                                   = var.vpc_id
+  control_plane_subnet_ids                 = var.subnet_ids
+  subnet_ids                               = var.subnet_ids
   enable_cluster_creator_admin_permissions = true
-  
+
   authentication_mode = "API_AND_CONFIG_MAP"
   # Extend cluster security group rules
   cluster_security_group_additional_rules = {
@@ -57,18 +57,18 @@ module "eks_blueprints_addons" {
       most_recent = true
     }
     vpc-cni = {
-      most_recent    = true
+      most_recent = true
     }
-#    eks-pod-identity-agent = {
-#      most_recent = true
-#      configuration_values = jsonencode({
-#        "agent" : {
-#          "additionalArgs" : {
-#            "-b" : "169.254.170.23"
-#          }
-#        }
-#      })
-#    }
+    #    eks-pod-identity-agent = {
+    #      most_recent = true
+    #      configuration_values = jsonencode({
+    #        "agent" : {
+    #          "additionalArgs" : {
+    #            "-b" : "169.254.170.23"
+    #          }
+    #        }
+    #      })
+    #    }
   }
 }
 #module "vpc_cni_irsa_role" {
