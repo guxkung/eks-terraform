@@ -62,9 +62,9 @@ module "eks_blueprints_addons" {
   cluster_version   = module.eks.cluster_version
   oidc_provider_arn = module.eks.oidc_provider_arn
   eks_addons = {
-    coredns = {
-      most_recent = true
-    }
+    #coredns = {
+    #  most_recent = true
+    #}
     kube-proxy = {
       most_recent = true
     }
