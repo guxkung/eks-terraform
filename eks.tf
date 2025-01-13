@@ -1,8 +1,8 @@
 module "vpc" {
-  source = "./modules/vpc"
-  vpc_id = var.vpc_id
+  source   = "./modules/vpc"
+  vpc_id   = var.vpc_id
   vpc_cidr = var.vpc_cidr
-  subnets = var.subnets
+  subnets  = var.subnets
 }
 
 module "eks" {
@@ -18,9 +18,9 @@ module "eks" {
   control_plane_subnet_ids                 = module.vpc.subnet_ids
   subnet_ids                               = module.vpc.subnet_ids
   enable_cluster_creator_admin_permissions = true
-  cluster_encryption_config   = {}
-  create_cloudwatch_log_group = false
-  cluster_enabled_log_types   = []
+  cluster_encryption_config                = {}
+  create_cloudwatch_log_group              = false
+  cluster_enabled_log_types                = []
 
   authentication_mode = "API_AND_CONFIG_MAP"
   # Extend cluster security group rules
