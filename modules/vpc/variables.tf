@@ -1,12 +1,6 @@
 variable "vpc_id" {
   type = string
 }
-variable "region" {
-  type = string
-}
-variable "account_ids" {
-  type = list(string)
-}
 variable "subnets" {
   type = list(object({
     cidr_block = string

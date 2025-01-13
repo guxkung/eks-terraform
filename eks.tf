@@ -1,15 +1,26 @@
+module "vpc" {
+  source   = "./modules/vpc"
+  vpc_id   = var.vpc_id
+  vpc_cidr = var.vpc_cidr
+  subnets  = var.subnets
+}
+
 module "eks" {
   source                          = "terraform-aws-modules/eks/aws"
   version                         = "~> 20.0"
   cluster_name                    = "test-cluster"
-  cluster_version                 = "1.30"
+  cluster_version                 = "1.31"
   cluster_endpoint_public_access  = false
   cluster_endpoint_private_access = true
   #  cluster_endpoint_public_access_cidrs	= ["YOUR_IP_CIDR_HERE"] # example public ip ["57.68.3.137/32"] or ["0.0.0.0/0"]
-  vpc_id                                   = var.vpc_id
-  control_plane_subnet_ids                 = var.subnet_ids
-  subnet_ids                               = var.subnet_ids
+  vpc_id = var.vpc_id
+
+  control_plane_subnet_ids                 = module.vpc.subnet_ids
+  subnet_ids                               = module.vpc.subnet_ids
   enable_cluster_creator_admin_permissions = true
+  cluster_encryption_config                = {}
+  create_cloudwatch_log_group              = false
+  cluster_enabled_log_types                = []
 
   authentication_mode = "API_AND_CONFIG_MAP"
   # Extend cluster security group rules
@@ -42,6 +53,7 @@ module "eks" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
+  depends_on = [module.vpc]
 }
 module "eks_blueprints_addons" {
   source            = "aws-ia/eks-blueprints-addons/aws"
@@ -50,9 +62,9 @@ module "eks_blueprints_addons" {
   cluster_version   = module.eks.cluster_version
   oidc_provider_arn = module.eks.oidc_provider_arn
   eks_addons = {
-    coredns = {
-      most_recent = true
-    }
+    #coredns = {
+    #  most_recent = true
+    #}
     kube-proxy = {
       most_recent = true
     }
@@ -70,6 +82,7 @@ module "eks_blueprints_addons" {
     #      })
     #    }
   }
+  depends_on = [module.vpc]
 }
 #module "vpc_cni_irsa_role" {
 #  source    = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
