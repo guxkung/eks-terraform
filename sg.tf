@@ -11,4 +11,3 @@ resource "aws_security_group" "allow_vpc_cidr_to_eks_endpoint" {
   }
   vpc_id = var.vpc_id
 }
-
