@@ -14,7 +14,10 @@ resource "aws_subnet" "private_subnets" {
   cidr_block = each.value["cidr_block"]
   tags = {
     Name = each.value["name"]
+    "kubernetes.io/cluster/test-cluster" = "shared"
+    "karpenter.sh/discovery" = "karpenter-blueprints"
   }
+  enable_resource_name_dns_a_record_on_launch = true
 }
 
 resource "aws_route_table" "private" {
@@ -27,7 +30,7 @@ resource "aws_route_table" "private" {
   }
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = data.aws_internet_gateway.gw.id
+    nat_gateway_id = aws_nat_gateway.single_nat_gw.id
   }
 
   tags = {
@@ -41,13 +44,13 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private.id
 }
 
-#resource "aws_nat_gateway" "single_nat_gw" {
-#  allocation_id =  aws_eip.nat.id
-#  subnet_id = var.public_subnet_id
-#  
-#  depends_on = [aws_internet_gateway.gw]
-#}
+resource "aws_nat_gateway" "single_nat_gw" {
+  allocation_id =  aws_eip.nat.id
+  subnet_id = var.public_subnet_id
+  
+  depends_on = [data.aws_internet_gateway.gw]
+}
 
-#resource "aws_eip" "nat" {
-#  depends_on = [aws_internet_gateway.gw]
-#}
+resource "aws_eip" "nat" {
+  depends_on = [data.aws_internet_gateway.gw]
+}
