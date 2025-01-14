@@ -3,6 +3,7 @@ module "vpc" {
   vpc_id   = var.vpc_id
   vpc_cidr = var.vpc_cidr
   subnets  = var.subnets
+  public_subnet_id = var.public_subnet_id
 }
 
 module "eks" {
@@ -55,12 +56,14 @@ module "eks" {
   }
   depends_on = [module.vpc]
 }
+
 module "eks_blueprints_addons" {
   source            = "aws-ia/eks-blueprints-addons/aws"
   cluster_name      = module.eks.cluster_name
   cluster_endpoint  = module.eks.cluster_endpoint
   cluster_version   = module.eks.cluster_version
   oidc_provider_arn = module.eks.oidc_provider_arn
+
   eks_addons = {
     #coredns = {
     #  most_recent = true
@@ -84,6 +87,22 @@ module "eks_blueprints_addons" {
   }
   depends_on = [module.vpc]
 }
+
+module "aws-auth" {
+  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
+  version = "~> 20.0"
+
+  manage_aws_auth_configmap = true
+
+  aws_auth_roles = [
+    {
+      rolearn  = module.eks_blueprints_addons.karpenter.node_iam_role_arn
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:bootstrappers", "system:nodes"]
+    },
+  ]
+}
+
 #module "vpc_cni_irsa_role" {
 #  source    = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 #  role_name = "identity-sa-vpc-cni-role"
