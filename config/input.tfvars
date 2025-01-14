@@ -9,4 +9,4 @@ vpc_cidr = "VPC_CIDR_HERE"
 region      = "YOUR_REGION"
 account_ids = ["YOUR_ACCOUNT_ID"]
 
-#public_subnet_id = "PUBLIC_SUBNET_ID_HERE"
+public_subnet_id = "PUBLIC_SUBNET_ID_HERE"
