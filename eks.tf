@@ -1,3 +1,12 @@
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks.cluster_name
+}
+
+locals {
+  name = "karpenter-blueprints"
+  node_iam_role_name = module.eks_blueprints_addons.karpenter.node_iam_role_name
+}
+
 module "vpc" {
   source   = "./modules/vpc"
   vpc_id   = var.vpc_id
@@ -54,9 +63,39 @@ module "eks" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
+  eks_managed_node_groups = {
+    mg = {
+      node_group_name = "managed-ondemand"
+      instance_types  = ["t3.large"]
+
+      #create_security_group = false
+      cluster_primary_security_group_id = module.eks.cluster_primary_security_group_id
+      vpc_security_group_ids = [module.eks.node_security_group_id]
+
+      subnet_ids   = module.vpc.subnet_ids
+      max_size     = 2
+      desired_size = 1
+      min_size     = 1
+
+      # Launch template configuration
+      #create_launch_template = true              # false will use the default launch template
+      #launch_template_os     = "amazonlinux2eks" # amazonlinux2eks or bottlerocket
+
+      labels = {
+        intent = "control-apps"
+      }
+    }
+  }
+  #cluster_compute_config = {
+  #  enabled    = true
+  #  node_pools = ["general-purpose"]
+  #}
+  tags = {
+    "karpenter.sh/discovery" = local.name
+  }
+
   depends_on = [module.vpc]
 }
-
 module "eks_blueprints_addons" {
   source            = "aws-ia/eks-blueprints-addons/aws"
   cluster_name      = module.eks.cluster_name
@@ -64,15 +103,35 @@ module "eks_blueprints_addons" {
   cluster_version   = module.eks.cluster_version
   oidc_provider_arn = module.eks.oidc_provider_arn
 
+  enable_karpenter  = true
+
+  karpenter = {
+    chart_version       = "1.1.1"
+    #repository_username = data.aws_ecrpublic_authorization_token.token.user_name
+    #repository_password = data.aws_ecrpublic_authorization_token.token.password
+  }
+  karpenter_enable_spot_termination          = true
+  karpenter_enable_instance_profile_creation = true
+  karpenter_node = {
+    iam_role_use_name_prefix = false
+  }
+
   eks_addons = {
-    #coredns = {
-    #  most_recent = true
-    #}
+    coredns = {
+      most_recent = true
+    }
     kube-proxy = {
       most_recent = true
     }
     vpc-cni = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true
+      configuration_values = jsonencode({
+        env = {
+          ENABLE_PREFIX_DELEGATION = "true"
+          WARM_PREFIX_TARGET       = "1"
+        }
+      })
     }
     #    eks-pod-identity-agent = {
     #      most_recent = true
