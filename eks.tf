@@ -34,6 +34,7 @@ module "eks" {
 
   authentication_mode = "API_AND_CONFIG_MAP"
   # Extend cluster security group rules
+  cluster_additional_security_group_ids = [aws_security_group.allow_vpc_cidr_to_eks_endpoint.id]
   cluster_security_group_additional_rules = {
     egress_nodes_ephemeral_ports_tcp = {
       description                = "To node 1025-65535"
@@ -62,6 +63,7 @@ module "eks" {
       type        = "egress"
       cidr_blocks = ["0.0.0.0/0"]
     }
+    source_cluster_security_group = true
   }
   eks_managed_node_groups = {
     mg = {
