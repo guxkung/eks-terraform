@@ -63,7 +63,13 @@ module "eks" {
       type        = "egress"
       cidr_blocks = ["0.0.0.0/0"]
     }
-    source_cluster_security_group = true
+    ingress_vpc = {
+      protocol    = "-1"
+      from_port   = 0
+      to_port     = 0
+      type        = "ingress"
+      cidr_blocks = [var.vpc_cidr]
+    }
   }
   eks_managed_node_groups = {
     mg = {

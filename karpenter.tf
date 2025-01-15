@@ -49,7 +49,7 @@ spec:
         - key: karpenter.sh/capacity-type
           operator: In
           values: ["spot", "on-demand"]
-        - key: karpenter.sh/instance-type
+        - key: node.kubernetes.io/instance-type
           operator: In
           values: ["t3.large", "t3.xlarge"]
       nodeClassRef:
