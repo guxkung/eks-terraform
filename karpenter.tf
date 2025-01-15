@@ -45,16 +45,13 @@ spec:
       requirements:
         - key: kubernetes.io/arch
           operator: In
-          values: ["amd64", "arm64"]
-        - key: "karpenter.k8s.aws/instance-cpu"
-          operator: In
-          values: ["4", "8", "16", "32", "48", "64"]
+          values: ["amd64"]
         - key: karpenter.sh/capacity-type
           operator: In
           values: ["spot", "on-demand"]
-        - key: karpenter.k8s.aws/instance-category
+        - key: karpenter.sh/instance-type
           operator: In
-          values: ["c", "m", "r", "i", "d"]
+          values: ["t3.large", "t3.xlarge"]
       nodeClassRef:
         name: default
         group: karpenter.k8s.aws
