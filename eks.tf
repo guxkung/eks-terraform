@@ -8,24 +8,24 @@ module "vpc" {
 
 module "eks" {
   source                          = "terraform-aws-modules/eks/aws"
-  version                         = "~> 20.0"
-  cluster_name                    = "test-cluster"
-  cluster_version                 = "1.31"
-  cluster_endpoint_public_access  = false
-  cluster_endpoint_private_access = true
+  version                         = "~> 21.18"
+  name                            = "test-cluster"
+  kubernetes_version              = "1.34"
+  endpoint_public_access          = false
+  endpoint_private_access         = true
   #  cluster_endpoint_public_access_cidrs	= ["YOUR_IP_CIDR_HERE"] # example public ip ["57.68.3.137/32"] or ["0.0.0.0/0"]
   vpc_id = var.vpc_id
 
   control_plane_subnet_ids                 = module.vpc.subnet_ids
   subnet_ids                               = module.vpc.subnet_ids
   enable_cluster_creator_admin_permissions = true
-  cluster_encryption_config                = {}
+  encryption_config                        = {}
   create_cloudwatch_log_group              = false
-  cluster_enabled_log_types                = []
+  enabled_log_types                        = []
 
   authentication_mode = "API_AND_CONFIG_MAP"
   # Extend cluster security group rules
-  cluster_security_group_additional_rules = {
+  security_group_additional_rules = {
     egress_nodes_ephemeral_ports_tcp = {
       description                = "To node 1025-65535"
       protocol                   = "tcp"
@@ -63,6 +63,7 @@ module "eks_blueprints_addons" {
   cluster_endpoint  = module.eks.cluster_endpoint
   cluster_version   = module.eks.cluster_version
   oidc_provider_arn = module.eks.oidc_provider_arn
+  version           = "~> 1.23.0"
 
   eks_addons = {
     #coredns = {
