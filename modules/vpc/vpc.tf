@@ -1,3 +1,7 @@
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 data "aws_internet_gateway" "gw" {
   filter {
     name   = "attachment.vpc-id"
@@ -7,18 +11,22 @@ data "aws_internet_gateway" "gw" {
 
 resource "aws_subnet" "private_subnets" {
   vpc_id = var.vpc_id
-  for_each = {
-    for index, subnet in var.subnets :
-    index => subnet
-  }
-  cidr_block = each.value["cidr_block"]
+  #for_each = {
+  #  for index, subnet in var.subnets :
+  #  index => subnet
+  #}
+  #cidr_block = each.value["cidr_block"]
+  cidr_block = cidrsubnet(var.vpc_cidr, 8, count.index)
   tags = {
-    Name = each.value["name"]
+    Name = "Subnet-${data.aws_availability_zones.available.names[count.index]}"
     "kubernetes.io/cluster/test-cluster" = "shared"
     "karpenter.sh/discovery" = "karpenter-blueprints"
   }
   enable_resource_name_dns_a_record_on_launch = true
+  count             = length(data.aws_availability_zones.available.names)
+  availability_zone   = data.aws_availability_zones.available.names[count.index]
 }
+    #Name = each.value["name"]
 
 resource "aws_route_table" "private" {
   #count                     = length(var.subnets)
